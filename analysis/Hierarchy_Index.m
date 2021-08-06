@@ -4,8 +4,7 @@
 % ---------------------- lessmann@uni-osnabrueck.de -----------------------
 
 %Hierarchy index and Beta index
-%Calculating the Hierarchy Index, the Beta Index and the average shortest
-%path
+%Calculating the Hierarchy Index
 
 % Requirements:
 % undirected, unweighted graphs with Edges and Nodes Table 
@@ -18,16 +17,6 @@
 %The inverse of b is the Hierarchy Index, the higher the index, the
 %stronger the hierarchy. Values below 1 are considered as no existing
 %hierarchy.
-
-%--------------------------------------------------------------------------
-%Beta Index: 
-% b = e/v , with e = Number of Edges and v = Number of Nodes.
-%Beta Index is basically the average NodeDegree/2
-
-%--------------------------------------------------------------------------
-%Average shortest path length
-%Measure of efficiency the smaller the value
-%--------------------------------------------------------------------------
 
 clear all;
 
@@ -116,18 +105,6 @@ for part = 1:totalgraphs
    %The hierarchy index is the inverse exponent of x
     HierarchyIndex.HierarchyIndex(part,:) = -f.b;
 
-%% ---------------- Beta Index and Shortest Path --------------------------
-
-    BetaIndex.Part(part,:) = currentPart;
-    BetaIndex.BetaIndex(part,:) = numedges(graphy)/numnodes(graphy);
-    
-    %Average shortest path
-    shortest = graphallshortestpaths(adjacency(graphy));
-    AvgShort.Part(part,:) = currentPart;
-    %Ignoring the not connected nodes (otherwise would be Inf)
-    AvgShort.AverageShortestPath(part,:) = ...
-        mean(shortest(~isinf(shortest)),'all');
-    
     
 %% -------------------------- Plotting ------------------------------------
 
@@ -178,8 +155,6 @@ end
 overviewIndices = table();
 overviewIndices.Part = BetaIndex.Part;
 overviewIndices.HierarchyIndex = HierarchyIndex.Slope;
-overviewIndices.BetaIndex = BetaIndex.BetaIndex;
-overviewIndices.AvgShortestPath = AvgShort.AverageShortestPath;
 
 
 %% --------------------------- Saving -------------------------------------
@@ -188,17 +163,11 @@ if saving_wanted == true
     
     save([savepath 'HierarchyIndex_Table.mat'],'HierarchyIndex');
     disp('Saved HierarchyIndex_Table');
-    save([savepath 'BetaIndex_Table.mat'],'BetaIndex');
-    disp('Saved BetaIndex_Table');
-    save([savepath 'AvgShortestPath.mat'],'AvgShort');
-    disp('Saved AvgShortestPath');
     
 end
 
 disp('Done');
 
 clearvars '-except' ...
-    AvgShort ...
-    BetaIndex ...
     HierarchyIndex ...
     overviewIndices;
