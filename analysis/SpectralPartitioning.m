@@ -5,7 +5,7 @@
 
 % Requirements:
 % undirected, unweighted graphs with Edges and Nodes Table 
-% The Edges Table needs to contain an EndNodes column
+
 
 %Spectral Graph Analysis consists of three steps
 %--------------------------------------------------------------------------
@@ -13,7 +13,7 @@
 %    (Degree Matrix - Adjacency Matrix) 
 %--------------------------------------------------------------------------
 % 2. Decomposition: Compute Eigenvalues and eigenvectors of the matrix.
-%    Take the second smaller eigenvalue/eigenvector
+%    Take the second smallest eigenvalue/eigenvector
 %--------------------------------------------------------------------------
 % 3. Grouping: Split the vector in two (negative and positiv components) 
 %    to get two clusters

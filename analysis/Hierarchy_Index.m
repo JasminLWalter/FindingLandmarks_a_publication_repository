@@ -1,17 +1,15 @@
-%% -------------------- Hierarchy_Beta_ShortestPath -----------------------
+%% -------------------- Hierarchy_Index -----------------------
 
 % -------------------- written by Lucas Essmann - 2020 --------------------
 % ---------------------- lessmann@uni-osnabrueck.de -----------------------
 
-%Hierarchy index and Beta index
-%Calculating the Hierarchy Index
+%Hierarchy index 
 
 % Requirements:
 % undirected, unweighted graphs with Edges and Nodes Table 
-% The Edges Table needs to contain an EndNodes column
 
 %--------------------------------------------------------------------------
-%Hierarchy Index: 
+%Procedure: 
 %Plotting all occuring degree values against their frequency
 %Afterwards fitting a power law function (a*x^b). 
 %The inverse of b is the Hierarchy Index, the higher the index, the
@@ -44,8 +42,7 @@ PartList = PartList(1,3:end);
 totalgraphs = length(PartList);
 
 HierarchyIndex = table();
-BetaIndex = table();
-AvgShort = table();
+
     
 %% ----------------------------- Main -------------------------------------
 for part = 1:totalgraphs
@@ -151,10 +148,6 @@ for part = 1:totalgraphs
      
 end
 
-%creating an overview file
-overviewIndices = table();
-overviewIndices.Part = BetaIndex.Part;
-overviewIndices.HierarchyIndex = HierarchyIndex.Slope;
 
 
 %% --------------------------- Saving -------------------------------------
@@ -169,5 +162,4 @@ end
 disp('Done');
 
 clearvars '-except' ...
-    HierarchyIndex ...
-    overviewIndices;
+    HierarchyIndex;

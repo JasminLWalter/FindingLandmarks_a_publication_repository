@@ -13,7 +13,7 @@
 % E>k = the number of edges between the nodes of
 % degree larger than or equal to k,
 % and N>k = the number of nodes with degree larger than or equal to k
-
+% 
 % But since the RichClubCoefficient is an abstract measure, the script
 % creates a random graph based on the degree distribution of the original
 % graph and calculates the RC of this random graph. Afterwards, it
