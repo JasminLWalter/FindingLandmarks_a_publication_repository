@@ -1,24 +1,38 @@
-%% ------------------ step1_condense Raw Data Version 3.0--------------------------------
-% script written by Jasmin Walter
+%% --------------------- step1_condenseRawData_V3.m------------------
 
-% takes raw Raycast3.0 file and condenses them, so that several
-% instances of colliders merged into one row. All other columns are moved into an array 
-% accordingly
-% renames some aspects for more intuitive understanding of the data
+% --------------------script written by Jasmin L. Walter----------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
 
+% Description: 
+% First script to run in pre-processing pipeline
+% Reads in raw Raycast3.0 file and condenses data, so that directly
+% consecutive instances of raycast hits on the same collider are merged into 
+% one row (hit point clusters). All other columns are moved into arrays 
+% into each row accordingly.
+
+% Input: 
 % uses raw Raycast3.0.txt file
-% output: condensedColliders_V3.mat file 
+% Output: 
+% condensedColliders_V3.mat     = new data files with each row containing 
+%                                 the data of a hit point cluster
+% OverviewAnalysis.mat          = summary of number and percentage of data
+%                                 rows with noData (= missing data samples)
+%                                 for each participant
+% Missing_Participant_Files.mat = contains all participant numbers where the
+%                                  data file could not be loaded
+
 clear all;
-% adjust savepath, current folder and participant list!
-savepath = 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\condensedColliders\';
 
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\Raycast3.0\'
+%% adjust the following variables: savepath, current folder and participant list!-----------
+savepath = '...\preprocessing\condensedColliders\';
 
+cd '...\preprocessing\Raycast3.0\'
 
-% Participant list of all participants that participated at least 3
-% sessions in the experiment in Seahaven - 90min (no belt participants)
-PartList = {1909 3668 8466 3430 6348 2151 4502 7670 8258 3377 1529 9364 6387 2179 4470 6971 5507 8834 5978 1002 7399 9202 8551 1540 8041 3693 5696 3299 1582 6430 9176 5602 2011 2098 3856 7942 6594 4510 3949 9748 3686 6543 7205 5582 9437 1155 8547 8261 3023 7021 5239 8936 9961 9017 1089 2044 8195 4272 5346 8072 6398 3743 5253 9475 8954 8699 3593 9848};
+% Participant list of all participants that participated 90 min divided 
+% into 3 sessions in the experiment in Seahaven
+PartList = {1002 1089 1155 1529 1540 1582 1909 2011 2044 2098 2151 2179 3023 3299 3377 3430 3668 3686 3693 3743 3856 3949 4272 4470 4502 4510 5239 5253 5346 5507 5582 5602 5696 5978 6348 6387 6398 6430 6543 6594 6971 7021 7205 7399 7670 7942 8041 8072 8195 8258 8261 8466 8547 8551 8699 8834 8936 8954 9017 9176 9202 9364 9437 9475 9748 9961};
 
+%% --------------------------------------------------------------------------
 
 
 Number = length(PartList);
@@ -29,7 +43,7 @@ missingData = array2table([]);
 overviewAnalysis = array2table(zeros(Number,4));
 overviewAnalysis.Properties.VariableNames = {'Participant','noData_Rows','total_Rows','percentage'};
 
-
+% loop code over all participants in participant list
 for ii = 1:Number
     currentPart = cell2mat(PartList(ii));
     
@@ -55,59 +69,30 @@ for ii = 1:Number
         totalRows = height(data);
         
         %% clean data
-        
-        % rename NH to sky if they looked into the sky
-        
+               
         colliders= data.Collider;
         distances= data.Distance;
-%         skyHouse = strcmp(colliders(:),'NH') & (distances(:)==200);
-%          
-%         store the renamed rows for checking
-%         skyRows= data(skyHouse,:);
-%         
-%         rename rows to sky
-%         data.Collider(skyHouse)= cellstr('sky');
         
      
-        % rename rows when pupils were detected with probability lower than 0,5
-        noD = strcmp(colliders(:),'noData');  
-%         % old code renaming NH + distance 0 to noData
-%         noD = strcmp(colliders(:),'NH') & eq(distances(:),0);     
-%         %rename rows
-%          data.Collider(noD)= cellstr('noData');
-%          data.Distance(noD) = NaN;
-%          data.VectorX(noD) = NaN;
-%          data.VectorY(noD) = NaN;
-%          data.VectorZ(noD) = NaN;
-%          data.eye2Dx(noD) = NaN;
-%          data.eye2Dy(noD) = NaN;
-         
         % calculate amount of noData rows
+        noD = strcmp(colliders(:),'noData');  
         NRnoDataRows = sum(noD);
         
 %% create the condensed viewed houses list  
-%         % create AllData Table
-%         NumArray = array2table(zeros(height(data),3));
-%         SeenHouses = cell(height(data),1);
-%         AllData= [SeenHouses NumArray];
-%         AllData.Properties.VariableNames = {'House','Time','Samples','Distances'};
-        
-        % create struct for all data with only one row (the others will be
-        % added according to the condensation process
+
         helperT = table;
         helperT.Samples = 1;
         helperT = [data(1,1:2),helperT,data(1,3:end)];
         condensedData = table2struct(helperT);
 
         
-
         % additional variables
         previous = condensedData(1).Collider;
         time = 1000/30;
         index=1;
 
         
-        % condenses the data
+        % condense the data into clusters
       
         for index3= 2: height(data)
             
@@ -140,8 +125,6 @@ for ii = 1:Number
                 condensedData(index).eye2Dx= [condensedData(index).eye2Dx,data.eye2Dx(index3)];
                 condensedData(index).eye2Dy= [condensedData(index).eye2Dy,data.eye2Dy(index3)];
                 
-%                 AllData.Samples(index)= AllData.Samples(index) +1;
-%                 AllData.Distances(index) = AllData.Distances(index) + data.Distance(index3);
                 else
                     disp('sth went wrong with the indexessssss');
                 end
@@ -183,14 +166,6 @@ for ii = 1:Number
             
         end
         
-%         % adjust distances (so far they are only sums, now average them)
-%         AllData.Distances= AllData.Distances ./ AllData.Samples;
-%         
-%             % remove all empty lines of AllData
-%             uncutAllData = AllData;
-%             AllData = head(AllData, index);
-%             
-%             
             
             % save condensed viewed houses
             
@@ -206,22 +181,12 @@ for ii = 1:Number
             
             overviewAnalysis.percentage(ii) = percent;
 
-       
-                
-            
-        
-      
-        
-        
 
-        
     else
         disp('something went really wrong with participant list');
     end
     
     
-    
-
 end
  
 disp(strcat(num2str(Number), ' of Participants analysed'));
