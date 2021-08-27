@@ -4,7 +4,7 @@
 % -----------------------jawalter@uni-osnabrueck.de------------------------
 
 % Description: 
-% First script to run in pre-processing pipeline
+
 % Reads in raw Raycast3.0 file and condenses data, so that directly
 % consecutive instances of raycast hits on the same collider are merged into 
 % one row (hit point clusters). All other columns are moved into arrays 
