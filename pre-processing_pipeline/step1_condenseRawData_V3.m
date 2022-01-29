@@ -1,6 +1,6 @@
-%% --------------------- step1_condenseRawData_V3.m------------------
+%% --------------------- step1_condenseRawData_V3.m------------------------
 
-% --------------------script written by Jasmin L. Walter----------------------
+% --------------------script written by Jasmin L. Walter-------------------
 % -----------------------jawalter@uni-osnabrueck.de------------------------
 
 % Description: 
