@@ -1,14 +1,37 @@
-%------------------- node_degree_centrality_analysis-----------------------
-% creates image scale for node degree centrality values over all
-% participants
-% prepares data for Anova - adds 1 and takes log
+%% ------------------- node_degree_centrality_analysis.m-------------------
+
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
+
+% Description:
+% Creates an image scale (pseudo 3D plot) color coding the node degree 
+% centrality values for every house and every participant (Fig. 5c). Also 
+% creates corresponding box plots with error bars: the individual mean node 
+% degrees of all subjects (Fig. 5a) and the individual mean node degree of
+% each house (Fig. 5e)
+
+% Input: 
+% Overview_NodeDegree.mat  =  table consisting of all node degree values
+%                             for all participants
+% Output: 
+% nodeDegree_imageScale.png = pseudo 3D plot color coding the node degree 
+%                             centrality values for every house and every 
+%                             participant (Fig. 5c)
+% nodeDegree_mean_std_allHouses.png = error bar plot of mean and std for 
+%                                     all houses (Fig. 5e)
+% nodeDegree_mean_std_allParticipants.png = error bar plot of mean and std
+%                                           for each participant (Fig. 5b)
+
 
 clear all;
 
-savepath = 'E:\NBP\SeahavenEyeTrackingData\90minVR\analysis\graphs\image_scale\';
+%% adjust the following variables: savepath and current folder!-----------
 
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\analysis\graphs\node_degree\'
+savepath = '...\analysis\graphs\image_scale\';
 
+cd '...\analysis\graphs\node_degree\'
+
+%--------------------------------------------------------------------------
 
 overviewDegree= load('Overview_NodeDegree.mat');
 
@@ -42,16 +65,9 @@ end
 
 columnN2 = sortedbyParts.Properties.VariableNames;
 sortedbyHP = [sortedbyParts; table('meanOfPart','VariableNames',columnN2(1)), array2table(sortPT{:,1}','VariableNames',columnN2(2:end-1)),table(NaN,'VariableNames',columnN2(end))];
-% 
-% was not working
-% sortedOHP = sortrows(sortedOH,'RowNames','meanOfPart','ascend');
-% 
-
-
 
 
 %% create image scale
-%transposeOverv = sortedbyHP'
 transpose2plot= sortedbyHP{1:end-1,2:end-1}';
 
 fig = figure(1);
@@ -69,9 +85,9 @@ ax.YLabel.String = 'Participants';
 print(gcf,strcat(savepath,'nodeDegree_imageScale.png'),'-dpng','-r300'); 
 savefig(gcf, strcat(savepath,'nodeDegree_imageScale.fig'));
 
-fig.PaperPositionMode = 'manual';
-orient(fig,'landscape')
-print(fig,strcat(savepath,'nodeDegree_imageScale_test.pdf'),'-dpdf','-fillpage')
+% fig.PaperPositionMode = 'manual';
+% orient(fig,'landscape')
+% print(fig,strcat(savepath,'nodeDegree_imageScale_test.pdf'),'-dpdf','-fillpage')
 
 %% create plots with error bars
 
