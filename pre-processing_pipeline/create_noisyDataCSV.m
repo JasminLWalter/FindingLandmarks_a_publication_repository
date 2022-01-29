@@ -1,14 +1,26 @@
-%%---------------------create_noisyCSV--------------------------------------
-% script written by Jasmin Walter
+%%---------------------create_noisyCSV-------------------------------------
 
-% uses gazes_vs_noise files to create csv files for all gazes
-% removes the remaining noData rows
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
+
+% Description:
+% The script creates csv versions of the Matlab noisy data files 
+% (excluded data), created during running the script step4_gazes_vs_noise
+% of the preprocessing pipeline.
+
+% Input:
+% noisy_data_V3.mat = the data file containing all excluded / noisy data
+
+% Output:
+% noisy_data.csv = the same file in csv format
 
 clear all;
 
-savepath = 'E:\SeahavenEyeTrackingData\csv_preprocessedData\(excluded)noisy_data\';
+%% adjust the following variables: savepath, current folder and participant list!-----------
 
-cd 'E:\SeahavenEyeTrackingData\duringProcessOfCleaning\gazes_vs_noise\'
+savepath = '...\preprocessing\csv_preprocessedData\(excluded)noisy_data\';
+
+cd '...\preprocessing\gazes_vs_noise\'
 
 % participant list of 90 min VR - only with participants who have lost less than 30% of
 % their data (after running script cleanParticipants_V2)
@@ -41,12 +53,12 @@ for ii = 1:Number
         noisyObjects = load(file);
         noisyObjects = noisyObjects.noisyObjects;
         
-%         % remove noData rows
+%         % remove noData rows if desired
 %         noData = strcmp(gazedObjects.House,'noData');
 %         gazes = gazedObjects;
 %         gazes(noData,:) = [];
         
-        writetable(noisyObjects,strcat(savepath,'noise_',num2str(currentPart),'.csv'));
+        writetable(noisyObjects,strcat(savepath,num2str(currentPart),'noisy_data.csv'));
         
     else
         disp('something went really wrong with participant list');
@@ -60,10 +72,6 @@ disp(strcat(num2str(countMissingPart),' files were missing'));
 csvwrite(strcat(savepath,'Missing_Participant_Files'),noFilePartList);
 disp('saved missing participant file list');
 
-% overviewGazes = load('Overview_Gazes.mat');
-% overviewGazes = overviewGazes.overviewGazes;
-% 
-% writetable(overviewGazes,strcat(savepath,'overview_gazes_noise.csv'));
 
 disp('saved Overview Gazes');
 
