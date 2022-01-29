@@ -1,25 +1,39 @@
-%% ------------------ create_Graphs Version 3-------------------------------------
-% script written by Jasmin Walter
+%% ------------------ step5_optional_create_Graphs_V3----------------------
 
-% 5th and last step of prepreocessing pipeline to create graphs from VR
-% data
-% step unnecessary if analysis does not involve graphs
-% creates graph objects using gazesObject files
-% removes all repetition and self references from graphs
-% removes noData node after creation of graph
-% output: graph objects for every participant
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
+
+% Description: 
+% 5th and last step of prepreocessing pipeline.
+% The script creates the gaze graphs from the gaze events
+% This step is unnecessary if analysis does not involve graphs
+% The script creates unweighted and binary graph objects the gaze events. 
+% To achieve this it removes all repetition and self references from graphs
+% and removes noData node after creation of graph
+
+% Input:  
+% gazes_data_V3.mat = a new data file containing all gazes
+
+% Output:
+% Graph_V3.mat = the gaze graph object for every participant
+% Missing_Participant_Files.mat = contains all participant numbers where the
+%                                  data file could not be loaded
+
 
 clear all;
 
+%% adjust the following variables: savepath, current folder and participant list!-----------
 
-savepath= 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\graphs\';
+
+savepath= '...\preprocessing\graphs\';
 
 
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\gazes_vs_noise\'
+cd '...\preprocessing\gazes_vs_noise\'
 
 % 20 participants with 90 min VR trainging less than 30% data loss
 PartList = {21 22 23 24 26 27 28 30 31 33 34 35 36 37 38 41 43 44 45 46};
 
+%-------------------------------------------------------------------------------
 
 Number = length(PartList);
 noFilePartList = [];
