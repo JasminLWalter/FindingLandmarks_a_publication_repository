@@ -106,13 +106,22 @@ for ii = 1:Number
             
         end
  %---------comment code until here to only show nodes without edges--------
-  % mark node houses
+  %% visualize nodes color coded according to the node degree values
+  
         node = ismember(coordinateList.House,nodeTable.Name);
         x = coordinateList{node,2};
         y = coordinateList{node,3};
-
+        
+        % calculate node degree centrality values here
+        % this markerND variable will manage the color coding of the nodes
+        % it is possible to modify the script here, to visualize other
+        % graph theoretical analysis where color coding of the nodes is
+        % helpful for the visualization. For example, we like the map
+        % visualization of the Rich Club analysis (Fig. 8b in the paper)
         
          markerND = centrality(graphy,'degree')';
+         
+         % plot visualization
          plotty = scatter(x,y,40,markerND,'filled');
          colormap(nodecolor);
          colorbar
