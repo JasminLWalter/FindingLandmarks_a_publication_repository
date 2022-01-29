@@ -1,32 +1,40 @@
-%% ------------------step 4: gazes_vs_noise Version 3----------------------------------------
-% script written by Jasmin Walter
+%% -----------------------step4_gazes_vs_noise_V3.m------------------------
 
-% divides condensed Collider list based on a set min sample value into 
-% gazes and noisy samples
-% in other words: devides condensed viewed houses list into gazes
-% and noise
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
 
-% uses condensedCollider files as input
-% output: list with glanced houses per subject -> objects that were gazed at
-%         list with noisy sample objects per subject -> objects that were
-%         not gazed on
-%         overall overview with percentage of gazed/noisy object list
+% Description:
+% Fourth step in the preprocessing pipeline.
+% Script divides the interpolated Collider data based on the gaze threshold 
+% into gazes and noisy samples (excluded data), i.e. it identifies the gaze events
 
+
+% Input: 
+% interpolatedColliders_3Sessions_V3.mat = the interpolated data file
+
+% Output: 
+% gazes_data_V3.mat = a new data file containing all gazes
+
+% noisy_data_V3.mat = all excluded data
+
+% Overview_Gazes.mat = overview of the amount of gazes and excluded data 
+%                      for each participant
+        
+% Missing_Participant_Files.mat = contains all participant numbers where the
+%                                  data file could not be loaded
 
 clear all;
 
-savepath = 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\gazes_vs_noise\';
+%% adjust the following variables: savepath, current folder and participant list!-----------
 
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\interpolatedColliders\';
+savepath = '...\preprocessing\gazes_vs_noise\';
 
-% participant list of 90 min VR - only with participants who have lost less than 30% of
-% their data (after running script cleanParticipants_V2)
-%PartList = {1909 3668 8466 2151 4502 7670 8258 3377 9364 6387 2179 4470 6971 5507 8834 5978 7399 9202 8551 1540 8041 3693 5696 3299 1582 6430 9176 5602 3856 7942 6594 4510 3949 3686 6543 7205 5582 9437 1155 8547 8261 3023 7021 9961 9017 2044 8195 4272 5346 8072 6398 3743 5253 9475 8954 8699 3593};
+cd '...\preprocessing\interpolatedColliders\';
 
 % 20 participants with 90 min VR trainging less than 30% data loss
 PartList = {21 22 23 24 26 27 28 30 31 33 34 35 36 37 38 41 43 44 45 46};
 
-
+%----------------------------------------------------------------------------
 
 Number = length(PartList);
 noFilePartList = [];
