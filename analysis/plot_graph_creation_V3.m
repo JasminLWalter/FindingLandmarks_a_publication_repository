@@ -1,48 +1,75 @@
-%% ------------------ plot_graph_creation-------------------------------------
-% script written by Jasmin Walter
+%% ------------------ plot_graph_creation_V3.m-----------------------------
+
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
+
+% Description: 
+% Creates a visualization of the graph creation process (Fig. 3a, 3b)
+% Note that for a good visualization of the corresponding graph on top of
+% the map (Fig. 3b), it is necessary to zoom into the figure produced by
+% the script (manually)
+
+% Input: 
+% gazes_data_V3.mat      = data file containing all gazes
+% Map_Houses_New.png     = image of the map of Seahaven 
+% CoordinateListNew.txt  = csv list of the house names and x,y coordinates
+%                          corresponding to the map of Seahaven
+
+% Output: 
+% Figure 1 (saved manually)= Timeline of gaze events within specified scope 
+%                            (Fig. 4a) - color coded
+% Figure 2 (saved manually)= Timeline of gaze events (Fig. 4a) 
+%                            – only blue marked gazes
+% Figure 3 (needs to be zoomed in and saved manually)
+%                          = Graph on top of the map corresponding to the 
+%                            time line and specified by the scope variable. 
+%                            The edges are numbered according to their creation order
+
+
+
 
 
 clear all;
 
+%% adjust the following variables: savepath, current folder, participant list and scope!-----------
 
-savepath= 'E:\NBP\SeahavenEyeTrackingData\90minVR\analysis\graphs\graph_plots\';
+savepath= '...\analysis\graph_creation';
+imagepath = '...\additional_files\'; % path to the map image location
+clistpath = '...\additional_files\'; % path to the coordinate list location
 
-
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\duringProcessOfCleaning\gazes_vs_noise\'
+cd '...\preprocessing\gazes_vs_noise\';
 
 % 20 participants with 90 min VR trainging less than 30% data loss
 PartList = {35};%21 22 23 24 26 27 28 30 31 33 34 35 36 37 38 41 43 44 45 46};
 
-% good visuals - 31
+ % identifies how much data should be plotted into the creation visualizations
+scope = 40;
 
+% -----------------------------------------------------------------------------
 
 Number = length(PartList);
 noFilePartList = [];
 countMissingPart = 0;
 
-scope = 40;
-
 % load map
 
-map = imread ('C:\Users\Jaliminchen\Documents\GitHub\NBP-VR-Eyetracking\EyeTracking_VR_Seahaven\additional_files\Map_Houses_New.png');
+map = imread (strcat(imagepath,'Map_Houses_New.png'));
 
 
 
 % load house list with coordinates
 
-listname = 'C:\Users\Jaliminchen\Documents\GitHub\NBP-VR-Eyetracking\EyeTracking_VR_Seahaven\additional_files\CoordinateListNew.txt';
+listname = strcat(clistpath,'CoordinateListNew.txt');
 coordinateList = readtable(listname,'delimiter',{':',';'},'Format','%s%f%f','ReadVariableNames',false);
 coordinateList.Properties.VariableNames = {'House','X','Y'};
 
-% coordinateList.X = coordinateList.X.*0.215555;  %factor of newmap vs oldmap resolution to fit the points
-% coordinateList.Y = coordinateList.Y.*0.215666;
 
 
 for ii = 1:Number
     currentPart = cell2mat(PartList(ii));
     
     
-    file = strcat('gazes_data_',num2str(currentPart),'.mat');
+    file = strcat(num2str(currentPart),'_gazes_data_V3.mat');
  
     % check for missing files
     if exist(file)==0
@@ -60,9 +87,6 @@ for ii = 1:Number
         
         currentPartName= strcat('Participant_',num2str(currentPart));
         
-%         % create houseList
-%         uniqueHouses= unique(gazedObjects.House);
-%         houseList = uniqueHouses;
         lastsum = 0;
         housesYaxis = 0;
         rowsAHouses = 0;
@@ -77,22 +101,17 @@ for ii = 1:Number
         color = colormap(jet);%(scope*4)
         sz = size(color); 
         scolor = sz(1,1) /11;
-        %colR = color(randperm(size(color, 1)), :);
-        %col = colR(1:2:end,:);
         col = color(1:scolor:end,:);
         
         xNan = [];
         yNan = [];
         
 
-        
-%         [uniqueHouses, iGazed, iunique] = unique(gazedObjects(:, 1), 'stable');
-%         ypatches = max(ylabels) + 1 - [ylabels, ylabels, ylabels-1, ylabels-1]'; 
         colorindex = 1;
         for index = 1: scope
             
             % x values
-            newsum = sum(gazedObjects.Samples(1:index));
+            newsum = sum([gazedObjects(1:index).Samples]);
             x = [lastsum newsum newsum lastsum];
             xlist = [xlist;x];
             
@@ -102,8 +121,8 @@ for ii = 1:Number
             
             % what is the data point? noData? NH/Sky? House?
             
-            noData = strcmp(gazedObjects{index,1},'noData');
-            other = strcmp(gazedObjects{index,1},'sky')||strcmp(gazedObjects{index,1},'NH');
+            noData = strcmp(gazedObjects(index).Collider,'noData');
+            other = strcmp(gazedObjects(index).Collider,'sky')||strcmp(gazedObjects(index).Collider,'NH');
             house = not(noData | other);
             
 %             hAH = height(appearedHouses);
@@ -129,7 +148,7 @@ for ii = 1:Number
                     currentColour = [0 0 0];
 %                     xNan = [xNan; x];
 %                     yNan = [yNan; y];
-                    appearedHouses.Name(rowsAHouses) = gazedObjects{index,1};
+                    appearedHouses.Name(rowsAHouses) = {gazedObjects(index).Collider};
 
 
                     % if it is sky or NH
@@ -137,7 +156,7 @@ for ii = 1:Number
                     noValue = 12;
                     y = [0 0 noValue noValue];
                     ylist = [ylist;y];
-                    if strcmp(gazedObjects{index,1},'sky')
+                    if strcmp(gazedObjects(index).Collider,'sky')
                         currentColour = [0 1 1];
                     else
                         currentColour = [0.85 0.85 0.85];
@@ -170,7 +189,7 @@ for ii = 1:Number
                             housesYaxis = housesYaxis+1;
                             rowsAHouses = rowsAHouses +1;
 
-                            appearedHouses.Name(rowsAHouses) = gazedObjects{index,1};
+                            appearedHouses.Name(rowsAHouses) = {gazedObjects(index).Collider};
                             appearedHouses.Number(rowsAHouses) = housesYaxis;
                             appearedHouses.Color(rowsAHouses) =  {col(colorindex,:)};
                             
@@ -185,9 +204,9 @@ for ii = 1:Number
                         
                         else
                             % if the house was already seen
-                            if any(strcmp(gazedObjects{index,1},appearedHouses.Name))
+                            if any(strcmp(gazedObjects(index).Collider,appearedHouses.Name))
 
-                                position = strcmp(gazedObjects{index,1},appearedHouses.Name);
+                                position = strcmp(gazedObjects(index).Collider,appearedHouses.Name);
                                 object = appearedHouses.Name(position);
                                 currentNumber = appearedHouses.Number(position);
                                 currentColour = appearedHouses.Color{position};
@@ -199,7 +218,7 @@ for ii = 1:Number
                                 housesYaxis = housesYaxis+1;
                                 rowsAHouses = rowsAHouses +1;
                         
-                                appearedHouses.Name(rowsAHouses) = gazedObjects{index,1};
+                                appearedHouses.Name(rowsAHouses) = {gazedObjects(index).Collider};
                                 appearedHouses.Number(rowsAHouses) = housesYaxis;
                                 appearedHouses.Color(rowsAHouses) =  {col(colorindex,:)};
                                 
@@ -262,16 +281,16 @@ for ii = 1:Number
            
         %% draw edges
         
-        edgerange = gazedObjects(1:scope,:);
-        sky = strcmp('sky',gazedObjects{1:scope,1});
-        nh = strcmp('NH',gazedObjects{1:scope,1});
+        edgerange = gazedObjects(1:scope);
+        sky = strcmp('sky',{gazedObjects(1:scope).Collider});
+        nh = strcmp('NH',{gazedObjects(1:scope).Collider});
         exclude= sky | nh;
-        edgerange(exclude,:) = [];
+        edgerange(exclude) = [];
         
         %%
                % create edge table
         
-        fullEdgeT= cell2table(edgerange.House,'VariableNames',{'Column1'});
+        fullEdgeT= cell2table({edgerange.Collider}','VariableNames',{'Column1'});
         
         % prepare second column to add to specify edges
         secondColumn = fullEdgeT.Column1;
@@ -427,6 +446,6 @@ disp(strcat(num2str(Number), ' Participants analysed'));
 disp(strcat(num2str(countMissingPart),' files were missing'));
 
 %csvwrite(strcat(savepath,'Missing_Participant_Files'),noFilePartList);
-disp('saved missing participant file list');
+%disp('saved missing participant file list');
 
 disp('done');
