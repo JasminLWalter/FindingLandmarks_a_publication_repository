@@ -1,25 +1,39 @@
-%% ---------------------------Step 3: Interpolate Lost Data Version 3----------------------------
-% written by Jasmin Walter
+%% -------------------step3_interpolateLostData_V3.m-----------------------
 
-% interpolates all lost data sample clusters 
-% interpolates only iff noData clusters are <= 7 samples big and occur between the same collider
+% --------------------script written by Jasmin L. Walter-------------------
+% -----------------------jawalter@uni-osnabrueck.de------------------------
 
+% Description: 
+% Third script to run in pre-processing pipeline
+% applies the interpolation of lost data samples (noData) if the
+% interpolation conditions apply: interpolation of clusters only iff: 
+% noData clusters are < 8 samples big and occur between the same collider
+
+% Input: 
+% condensedColliders_3Sessions_V3.mat = the condesedColliders file after
+%                                       combining all 3 session in the
+%                                       script
+%                                       "step2_optional_join3SessionsVR_V3"
+% Output: 
+% interpolatedColliders_3Sessions_V3.mat = the newly interpolated data file
+
+% Missing_Participant_Files.mat = contains all participant numbers where the
+%                                  data file could not be loaded
 
 
 clear all;
 
-savepath = 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\interpolatedColliders\';
+%% adjust the following variables: savepath, current folder and participant list!-----------
 
-cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\combined3sessions\'
+savepath = '...\preprocessing\interpolatedColliders\';
 
+cd '...\preprocessing\combined3sessions\'
 
-% participant list of 90 min VR - only with participants who have lost less than 30% of
-% their data (after running script cleanParticipants_V2)
-%PartList = {1909 3668 8466 2151 4502 7670 8258 3377 9364 6387 2179 4470 6971 5507 8834 5978 7399 9202 8551 1540 8041 3693 5696 3299 1582 6430 9176 5602 3856 7942 6594 4510 3949 3686 6543 7205 5582 9437 1155 8547 8261 3023 7021 9961 9017 2044 8195 4272 5346 8072 6398 3743 5253 9475 8954 8699 3593};
 
 % 20 participants with 90 min VR trainging less than 30% data loss
 PartList = {21 22 23 24 26 27 28 30 31 33 34 35 36 37 38 41 43 44 45 46};
 
+% --------------------------------------------------------------------------
 
 Number = length(PartList);
 noFilePartList = [];
