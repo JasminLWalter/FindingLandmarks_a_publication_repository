@@ -21,23 +21,76 @@
 % above 1 would indicate that high node degree nodes are connected to other
 % high node degree nodes above chance level 
 
+% Input:
+% Graph_V3.mat           = the gaze graph object for every participant
+
+% Map_Houses_New.png     = image of the map of Seahaven in black and white
+
+% CoordinateListNew.txt  = csv list of the house names and x,y coordinates
+%                          corresponding to the map of Seahaven
+
+% Output:
+% Figure 1 = All houses displayed on the map both color coded and size coded 
+%            according to their frequency of being part of the rich club 
+%            across participants (Fig 8b in paper)
+
+% Figure 2/ MeanRichClub.png = The development of the rich club coefficient 
+%                              with increasing node degree. The dot-lines 
+%                              are the rich club coefficients of individual 
+%                              participants, while the green line is the 
+%                              mean across all participants (Fig 8a in paper)
+
+
+% RichClub_AllSubs.mat = overview of all rich club values as a function of 
+%                        the threshold node degree for each participant.
+%                        Note: that the columns correspond to the selection
+%                        of the houses included in the rich club based on the
+%                        node degree - so column 2 corresponds to the first 
+%                        threshold 1 = all nodes of a degree 1 or larger are 
+%                        considered. Consequently, column 3 corresponds to
+%                        the threshold: all nodes of degree 2 and larger
+%                        etc.
+
+% Mean_RichClub.mat = overview of the mean rich club values as a function
+%                     of the threshold node degree averaged over all
+%                     participants. Here column 1 corresponds to the
+%                     threshold of all nodes of a degree of 1 and larger
+%                     and column 2 corresponds to the threshold of all
+%                     nodes of a degree of 2 and larger etc.
+
+% List_RichClub_Frequency_ofallHouses.mat = overview of all houses and the
+%                                           frequency of the houses
+%                                           appearing in a rich club across
+%                                           participants
+
+
+
 clear all;
 
-plotting_wanted = true; % if you want to plot, set to true
-saving_wanted = false; % if you want to save, set to true
+%% ------------------- adjust the following variables: -------------------------------
 
-%% -------------------------- Initialisation ------------------------------
+plotting_wanted = true; % if you want to plot, set to true
+saving_wanted = true; % if you want to save, set to true
 
 path = what;
 path = path.path;
 
 % cd into graph folder location
-cd graphs;
+cd 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\preprocessing\graphs\';
 
-savepath = strcat(path,'/Results/SpectralPartitioning/');
+savepath = 'E:\NBP\SeahavenEyeTrackingData\90minVR\Version03\analysis\RichClub\';
+imagepath = 'D:\Github\FindingLandmarks_analyzingEyeTrackingDataInVRusingGraphTheory\additional_files\'; % path to the map image location
+clistpath = 'D:\Github\FindingLandmarks_analyzingEyeTrackingDataInVRusingGraphTheory\additional_files\'; % path to the coordinate list location
 
-houseList = load(strcat(path, '/Dependencies/HouseList.mat'));
-houseList = houseList.houseList;
+%% -------------------------- Initialisation ------------------------------
+
+ 
+% load house list with coordinates
+
+listname = strcat(clistpath,'CoordinateListNew.txt');
+coordinateList = readtable(listname,'delimiter',{':',';'},'Format','%s%f%f','ReadVariableNames',false);
+coordinateList.Properties.VariableNames = {'House','X','Y'};
+
 
 %graphfolder
 PartList = dir();
@@ -53,7 +106,7 @@ NodeCountAll = zeros(213,1);
 
 %% ----------------------------Main Part-----------------------------------
 
-for part = 1:totalgraphs
+for part = 1:20%totalgraphs
    
   % load graph
     graphy = load(string(PartList(part)));
@@ -194,7 +247,7 @@ end
        % Are always the same houses in the repective rich club? 
          DegreeOver10 = ND>=13; 
          NodeCountSub = ...
-             ismember(houseList,graphy.Nodes.Name(DegreeOver10));
+             ismember(coordinateList.House,graphy.Nodes.Name(DegreeOver10));
          NodeCountSub = double(NodeCountSub);
          
          NodeCountAll = NodeCountAll + NodeCountSub;
@@ -208,20 +261,17 @@ MeanRichClub = nanmean(RichT(:,2:end));
 if plotting_wanted == true
   % Draw Graph with Rich Club Information on Map
   % display map
-    map = imread(strcat(path, '/Dependencies/map5.png'));
+    map = imread(strcat(imagepath,'Map_Houses_New.png'));
     figgy = figure();%('Position', get(0, 'Screensize'));
     F = getframe(figgy);
     imshow(map);
     alpha(0.1)
     hold on;
 
-   % With Degree Centrality Analysis:
-     coordinateList = ...
-         load(strcat(path, '/Dependencies/CoordinateList.txt'));
-     x = coordinateList(:,2);
-     y = coordinateList(:,3);
-     x = x.*0.215555;  % factor to fit the map resolution 
-     y = y.*0.215666;
+   % With Degree Centrality Analysis:   
+     x = coordinateList.X;
+     y = coordinateList.Y;
+
      plotty = scatter(x,y,(NodeCountAll+1)*15,NodeCountAll,'filled');
      colormap(parula);
      colorbar
@@ -250,10 +300,14 @@ end
 if saving_wanted == true
     save([savepath 'RichClub_AllSubs.mat'],'RichT');
     save([savepath 'Mean_RichClub.mat'],'MeanRichClub');
+    rc_countList = table;
+    rc_countList.Houses = coordinateList.House;
+    rc_countList.Frequency = NodeCountAll;
+    save([savepath 'List_RichClub_Frequency_ofallHouses.mat'], 'rc_countList');
 end
 
-clearvars '-except' ...
-    RichT ...
-    MeanRichClub;
+% clearvars '-except' ...
+%     RichT ...
+%     MeanRichClub;
 
 disp('Done');
