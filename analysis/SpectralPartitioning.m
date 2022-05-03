@@ -25,21 +25,60 @@
 % second smallest Eigenvalue. Iff there are more than 1 non connected nodes
 % the 3rd smallest Eigenvalue will be used. 
 
+% Input: 
+% Graph_V3.mat           = the gaze graph object for every participant
+
+
+% Output: 
+% 2ndSmallestEigenvector.png = The second smallest eigenvector of the Laplacian 
+                               % matrix is sorted ascendingly and color coded 
+                               % into two clusters. (Fig 4c in the paper)
+                               
+% Cluster.png = cluster visualization of the graph
+
+% Spy_AdjacencyMatrix.png   = The sparsity pattern of the graph’s adjacency 
+%                             matrix sorted by the entries in second smallest
+%                             eigenvector. Color coded into edges between 
+%                             nodes of one cluster (green), edges between 
+%                             nodes of the other cluster (red), edges between 
+%                             nodes of the two clusters (black) and a distinction 
+%                             between the clusters (yellow) (Fig 4a in the
+%                             paper)
+%                                    
+
+% Histogram_2nd_Smallest_EigentvectorL = Histogram of the distribution of
+%                                        second smallest eigenvector for
+%                                        each participant
+
+% eig_neg.mat = negative part of the eigenvector
+
+% eig_pos.mat = positive part of the eigenvector
+
+% EigenvalueSpectrumL = all Eigenvalues
+
+% SpectralDocumentation.mat = overview of Eigenvalue statistics over all
+%                             participants
+
+
+
 clear all;
 
-plotting_wanted = false; % if you want to plot, set to true
-saving_wanted = false; % if you want to save, set to true
-
-%% -------------------------- Initialisation ------------------------------
+%% ---------- adjust the following variables: --------------------------------
 
 path = what;
 path = path.path;
 
 %savepath
-savepath = strcat(path,'/Results/SpectralPartitioning/');
+savepath = '...\Spectral_Partitioning\';
+
 
 % cd into graph folder location
-cd graphs;
+cd '...\preprocessing\graphs\';
+
+plotting_wanted = true; % if you want to plot, set to true
+saving_wanted = true; % if you want to save, set to true
+
+%% -------------------------- Initialisation ------------------------------
 
 %graphfolder
 PartList = dir();
@@ -55,7 +94,11 @@ Cut_Edges = table();
 
 %% ----------------------------- Main -------------------------------------
 
-for part = 1:totalgraphs
+% note, if you have a missing participant file in the graph folder, you
+% need to remove this from reading into the for loop - e.g. an easy fix is: 
+% for part = 1:totalgraphs-1
+
+for part = 1:totalgraphs 
     %load graph
     graphy = load(string(PartList(part)));
     graphy = graphy.graphy;
@@ -201,23 +244,68 @@ eigenvalue3L = [];
       % Plotting the Adjacency Matrix based on the sorting distribution of  
       % the second smallest Eigenvector 
       % (Spy Matrix or Sparse Pattern Matrix)
+      %%
+%         [ignore, path] = sort(eigenvector2L);
+%         figure('Name',strcat('Part_',currentPart,'_AdjacencySpy'));
+%         sortedAdj = AdjacencyMatrix(path,path);
+%         spy(sortedAdj);
+%         
+%       % Split into pos and neg part 
+%         p_neg = path(ignore<=0);
+%         p_pos = path(ignore>0);
+%         
+%         Adj_neg = sortedAdj;
+%         Adj_neg(p_pos,p_pos) = 0;
+%         Adj_pos = sortedAdj;
+%         Adj_pos(p_neg,p_neg) = 0;
+%         
+%         spy(Adj_pos,'r',20);
+%         hold on;
+%         spy(Adj_neg,'g',20);
+%         xlabel('Matrix Entries');
+%         ylabel('Matrix Entries');
+%         xticks([0 100 200]);
+%         yticks([0 100 200]);
+%         set(gca,'FontSize',40,'FontWeight','bold','Box','off');
+%         rectangle('Position',[0 0 212 212],'LineWidth',1.5);
+%         
+%         cmap = [0.40 0.80 0.42   %green
+%                 0.27 0.38 0.99]; %blue
+
+            %%
+%second smallest Eigenvector
         [ignore, path] = sort(eigenvector2L);
         figure('Name',strcat('Part_',currentPart,'_AdjacencySpy'));
         sortedAdj = AdjacencyMatrix(path,path);
-        spy(sortedAdj);
         
-      % Split into pos and neg part 
+        %Split into pos and neg part 
         p_neg = path(ignore<=0);
         p_pos = path(ignore>0);
         
-        Adj_neg = sortedAdj;
+        if length(p_neg) < length(p_pos)
+            cut_index = length(p_neg);
+        else
+            cut_index = length(p_pos);
+        end
+        
+        
+        Adj_neg = AdjacencyMatrix;
         Adj_neg(p_pos,p_pos) = 0;
-        Adj_pos = sortedAdj;
+        Adj_neg = Adj_neg(path,path);
+        Adj_pos = AdjacencyMatrix;
         Adj_pos(p_neg,p_neg) = 0;
+        Adj_pos = Adj_pos(path,path);
+        
+        Adj_between = AdjacencyMatrix;
+        Adj_between(p_neg,p_neg) = 0;
+        Adj_between(p_pos,p_pos) = 0;
+        Adj_between = Adj_between(path,path);
         
         spy(Adj_pos,'r',20);
         hold on;
         spy(Adj_neg,'g',20);
+        hold on;
+        spy(Adj_between, 'k', 20);
         xlabel('Matrix Entries');
         ylabel('Matrix Entries');
         xticks([0 100 200]);
@@ -225,8 +313,16 @@ eigenvalue3L = [];
         set(gca,'FontSize',40,'FontWeight','bold','Box','off');
         rectangle('Position',[0 0 212 212],'LineWidth',1.5);
         
-        cmap = [0.40 0.80 0.42   %green
-                0.27 0.38 0.99]; %blue
+        hold on;
+        x1 = [0 max(path)];
+        y1 = [cut_index cut_index];
+        line(x1,y1,'Color',[0.96,0.73,0.23],'LineStyle','-', 'LineWidth',7);
+        
+        hold on;
+        x2 = [cut_index cut_index];
+        y2 = [0 max(path)];
+        line(x2,y2,'Color',[0.96,0.73,0.23],'LineStyle','-', 'LineWidth',7);
+
             
         if saving_wanted == true
             saveas(gcf,strcat(savepath,'Spy_AdjacencyMatrix_Part',...
@@ -368,8 +464,8 @@ eigenvalue3L = [];
             end
 end
 
-clearvars '-except' ...
-    Cut_Edges ...
-    Doc;
+% clearvars '-except' ...
+%     Cut_Edges ...
+%     Doc;
    
 disp('Done');
